@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Resultados de evaluación de desempeño</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.460.0/dist/umd/lucide.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+</head>
+<body class="locked">
+  <!-- ===================== INICIO DE SESIÓN ===================== -->
+  <section class="login" id="login">
+    <form class="login-card" id="loginForm" autocomplete="on">
+      <span class="brand-mark" aria-hidden="true"><i data-lucide="radar"></i></span>
+      <h1>Evaluación de desempeño</h1>
+      <p class="login-sub">Ingresa con tu usuario para ver los resultados.</p>
+      <label>Usuario<input id="loginUser" name="username" autocomplete="username" required></label>
+      <label>Contraseña
+        <span class="pw-wrap"><input id="loginPass" name="password" type="password" autocomplete="current-password" required>
+        <button type="button" class="pw-toggle" id="pwToggle" aria-label="Mostrar contraseña"><i data-lucide="eye"></i></button></span>
+      </label>
+      <div class="login-error" id="loginError" hidden></div>
+      <button class="btn btn-primary login-btn" type="submit"><i data-lucide="log-in"></i>Ingresar</button>
+    </form>
+  </section>
+
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true"><i data-lucide="radar"></i></span>
+        <div>
+          <div class="brand-title">Evaluación de desempeño</div>
+          <div class="brand-sub" id="campaignName">Carga los archivos para comenzar</div>
+        </div>
+      </div>
+      <nav class="steps" aria-label="Secciones">
+        <button class="step is-active" data-view="load"><span class="step-n">1</span>Cargar datos</button>
+        <button class="step" data-view="weights" disabled><span class="step-n">2</span>Ponderaciones</button>
+        <button class="step" data-view="dashboard" disabled><span class="step-n">3</span>Dashboard</button>
+        <button class="step" data-view="report" disabled><span class="step-n">4</span>Reporte individual</button>
+      </nav>
+      <div class="session">
+        <span class="session-user"><i data-lucide="user-round"></i><span id="sessionName"></span></span>
+        <button class="btn btn-sm" id="btnLogout"><i data-lucide="log-out"></i>Salir</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <!-- ===================== 1. CARGA ===================== -->
+    <section class="view is-active" id="view-load">
+      <div class="intro">
+        <h1>Carga los resultados de la evaluación</h1>
+        <p>Los archivos se leen en este navegador. Ningún dato se envía a un servidor.</p>
+      </div>
+      <div class="drop-grid">
+        <label class="drop" id="drop1" data-slot="scores">
+          <input type="file" accept=".xlsx,.xls,.csv" hidden>
+          <div class="drop-icon"><i data-lucide="sheet"></i></div>
+          <div class="drop-body">
+            <div class="drop-title">Calificaciones</div>
+            <div class="drop-hint">Excel con COMPETENCIA, CALIFICACION, EVALUADO, ROL, AREA… (por ejemplo CALCULASEREVALUACION.xlsx)</div>
+            <div class="drop-status" data-status>Pendiente</div>
+          </div>
+        </label>
+        <label class="drop" id="drop2" data-slot="feedback">
+          <input type="file" accept=".xlsx,.xls,.csv" hidden>
+          <div class="drop-icon"><i data-lucide="message-square-text"></i></div>
+          <div class="drop-body">
+            <div class="drop-title">Retroalimentación de jefes</div>
+            <div class="drop-hint">Excel con EVALUADO, EVALUADOR, FEEDBACK, ASPECTS (por ejemplo calcularesfeedback.xlsx)</div>
+            <div class="drop-status" data-status>Pendiente</div>
+          </div>
+        </label>
+      </div>
+      <p class="drop-note">Arrastra cada archivo a su recuadro o haz clic para elegirlo. El de retroalimentación es opcional.</p>
+      <details class="panel fold general-fb" id="generalFb">
+        <summary><h2>Retroalimentación general para el informe de la compañía</h2><span class="fold-meta" id="generalFbMeta">Opcional</span></summary>
+        <div>
+          <p class="kpi-s" style="margin-bottom:12px">Lo que escribas aquí aparece en el informe de la compañía (PDF) del Dashboard. Se guarda en este navegador.</p>
+          <div class="gfb-grid">
+            <label class="gfb strong"><span><i data-lucide="sparkles"></i>Fortalezas de la organización</span>
+              <textarea id="gfbStrengths" rows="6" placeholder="Por ejemplo: alto compromiso con la atención humanizada en todas las áreas…"></textarea></label>
+            <label class="gfb improve"><span><i data-lucide="trending-up"></i>Aspectos a mejorar</span>
+              <textarea id="gfbImprove" rows="6" placeholder="Por ejemplo: fortalecer la toma de decisiones en los cargos de liderazgo…"></textarea></label>
+          </div>
+          <label class="gfb gfb-wide"><span><i data-lucide="flag"></i>Conclusiones y próximos pasos</span>
+            <textarea id="gfbNext" rows="4" placeholder="Acciones acordadas, planes de formación, fechas de seguimiento…"></textarea></label>
+        </div>
+      </details>
+
+      <div class="load-actions">
+        <button class="btn btn-primary" id="btnProcess" disabled><i data-lucide="play"></i>Analizar archivos</button>
+      </div>
+      <div id="loadMsg" class="msg" hidden></div>
+    </section>
+
+    <!-- ===================== 2. PONDERACIONES ===================== -->
+    <section class="view" id="view-weights">
+      <div class="intro">
+        <h1>Ponderación por combinación de evaluadores</h1>
+        <p id="weightsLead"></p>
+      </div>
+      <div id="analysisFacts" class="facts"></div>
+      <div id="comboList" class="combo-list"></div>
+      <div class="panel semaforo-cfg">
+        <div>
+          <h2>Semáforo de resultados</h2>
+          <p class="kpi-s">Define desde qué puntaje (escala 1 a 4) se considera cada color. Se aplica en el dashboard, los reportes y los PDF.</p>
+        </div>
+        <div class="sem-inputs">
+          <label><span class="sem-lbl"><span class="sem-dot sem-green"></span>Sobresaliente desde</span>
+            <input type="number" id="semGreen" min="1" max="4" step="0.05"></label>
+          <label><span class="sem-lbl"><span class="sem-dot sem-yellow"></span>Adecuado desde</span>
+            <input type="number" id="semYellow" min="1" max="4" step="0.05"></label>
+          <span class="sem-red-txt"><span class="sem-dot sem-red"></span> Por mejorar: por debajo de <b id="semRedTxt"></b></span>
+        </div>
+        <div class="weights-error" id="semError" hidden></div>
+      </div>
+
+      <div class="sticky-actions">
+        <div id="weightsError" class="weights-error" hidden></div>
+        <button class="btn" id="btnSuggest"><i data-lucide="wand-sparkles"></i>Usar la sugerencia en todas</button>
+        <button class="btn btn-primary" id="btnApplyWeights"><i data-lucide="check"></i>Aplicar y ver dashboard</button>
+      </div>
+    </section>
+
+    <!-- ===================== 3. DASHBOARD ===================== -->
+    <section class="view" id="view-dashboard">
+      <div class="dash-head">
+        <div class="intro">
+          <h1>Resultados de la organización</h1>
+          <p>Escala de 1 a 4. Los puntajes finales usan las ponderaciones definidas en el paso 2.</p>
+        </div>
+        <div class="filters">
+          <label>Área
+            <select id="fArea"><option value="">Todas las áreas</option></select>
+          </label>
+          <label>Cargo
+            <select id="fCargo"><option value="">Todos los cargos</option></select>
+          </label>
+          <label>Tipo de competencia
+            <select id="fCat"><option value="">Todas</option></select>
+          </label>
+        </div>
+      </div>
+
+      <div class="export-bar">
+        <div class="export-text"><b>Descargas</b><span id="exportHint">Respetan los filtros de perfil y evaluadores.</span></div>
+        <button class="btn" id="btnCompanyPdf"><i data-lucide="building-2"></i>Informe de la compañía (PDF)</button>
+        <button class="btn btn-primary" id="btnZip"><i data-lucide="folder-archive"></i><span id="btnZipLabel">Todos los reportes individuales (.zip)</span></button>
+      </div>
+
+      <div class="kpis" id="kpis"></div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <div class="chart-title">
+            <h2 id="chartTitle">Promedio por competencia</h2>
+            <label class="inline-select">Ver por
+              <select id="chartBy">
+                <option value="comp">Competencias</option>
+                <option value="area">Área</option>
+                <option value="cargo">Cargo</option>
+              </select>
+            </label>
+            <div class="seg" id="chartCatSeg" role="group" aria-label="Tipo de competencia del gráfico"></div>
+          </div>
+          <div class="seg" role="group" aria-label="Tipo de gráfico">
+            <button class="seg-btn is-on" data-chart="final">Ponderado</button>
+            <button class="seg-btn" data-chart="roles">Por roles</button>
+          </div>
+        </div>
+        <div class="chart-box"><canvas id="compChart"></canvas></div>
+        <p class="panel-foot" id="compChartFoot"></p>
+      </div>
+
+      <div class="two-col">
+        <details class="panel fold" id="areasPanel" open>
+          <summary><h2>Resultados por área</h2><span class="fold-meta" id="areasMeta"></span></summary>
+          <div id="areasBody"></div>
+        </details>
+        <details class="panel fold" id="partPanel" open>
+          <summary><h2>Participación</h2><span class="fold-meta" id="partMeta"></span></summary>
+          <div id="partBody"></div>
+        </details>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Colaboradores evaluados</h2>
+          <div class="search-inline">
+            <i data-lucide="search"></i>
+            <input type="search" id="tableSearch" placeholder="Buscar por nombre, cargo o documento">
+          </div>
+        </div>
+        <div class="table-scroll">
+          <table class="people-table" id="peopleTable">
+            <thead>
+              <tr>
+                <th data-sort="name">Colaborador</th>
+                <th data-sort="area">Área</th>
+                <th data-sort="combo">Evaluadores</th>
+                <th data-sort="final" class="num">Final</th>
+                <th data-sort="final">Semáforo</th>
+                <th data-sort="gap">Autoevaluación frente a jefe</th>
+                <th data-sort="flags" class="num">Obs.</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== 4. REPORTE INDIVIDUAL ===================== -->
+    <section class="view" id="view-report">
+      <div class="report-tools no-print">
+        <div class="picker">
+          <i data-lucide="user-search"></i>
+          <input id="personSearch" type="text" placeholder="Busca un colaborador por nombre o documento" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="personList">
+          <ul id="personList" class="picker-list" role="listbox" hidden></ul>
+        </div>
+        <div class="report-nav" id="reportNav" hidden>
+          <button class="btn" id="btnPrev" aria-label="Reporte anterior"><i data-lucide="chevron-left"></i>Anterior</button>
+          <span class="nav-pos" id="navPos"></span>
+          <button class="btn" id="btnNext" aria-label="Siguiente reporte">Siguiente<i data-lucide="chevron-right"></i></button>
+        </div>
+        <button class="btn btn-primary btn-pdf" id="btnPdf" disabled><i data-lucide="file-down"></i>Descargar reporte individual en PDF</button>
+      </div>
+      <div id="reportEmpty" class="empty">
+        <i data-lucide="user-round"></i>
+        <p>Elige un colaborador en el buscador o desde la tabla del dashboard.</p>
+      </div>
+      <article id="report" class="report" hidden></article>
+    </section>
+  </main>
+
+  <div id="toast" class="toast" role="status" hidden></div>
+  <div id="busy" class="busy" role="alertdialog" aria-live="polite" hidden>
+    <div class="busy-card">
+      <div class="busy-text" id="busyText">Generando PDF…</div>
+      <div class="busy-bar"><span id="busyBar"></span></div>
+      <button class="btn btn-sm" id="busyCancel" hidden>Cancelar</button>
+    </div>
+  </div>
+
+  <script src="users.js"></script>
+  <script src="engine.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

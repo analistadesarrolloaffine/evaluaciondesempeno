@@ -1,0 +1,26 @@
+DATOS PRECARGADOS PARA EL ROL DE GESTIÓN HUMANA
+===============================================
+
+1. Copia los dos Excel en la carpeta  datos/calculaser/  con estos nombres:
+
+     calificaciones.xlsx       <- el archivo de calificaciones (antes CALCULASEREVALUACION.xlsx)
+     retroalimentacion.xlsx    <- el archivo de comentarios (antes calcularesfeedback.xlsx)
+
+   Si prefieres otros nombres o carpetas, cambia las rutas en users.js,
+   en el usuario con  rol: 'gh'  (bloque "archivos").
+
+2. Publica de nuevo el sitio (Netlify / Vercel) con la carpeta incluida.
+
+3. Para actualizar los datos de una nueva evaluación, reemplaza los dos
+   archivos (mismos nombres) y vuelve a publicar. No hay que tocar código.
+
+4. Para otra empresa, crea otra carpeta (por ejemplo datos/otraempresa/)
+   y otro usuario con rol 'gh' que apunte a esos archivos.
+
+ADVERTENCIA DE PRIVACIDAD
+Los archivos de esta carpeta quedan publicados en internet: cualquiera
+que adivine la dirección exacta (por ejemplo
+https://tusitio.netlify.app/datos/calculaser/calificaciones.xlsx)
+podría descargarlos. Para datos de personal se recomienda activar la
+protección con contraseña del sitio completo que ofrecen Netlify y
+Vercel, además del inicio de sesión de la app.
