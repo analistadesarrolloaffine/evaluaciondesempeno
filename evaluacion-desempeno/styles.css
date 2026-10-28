@@ -564,3 +564,6 @@ body.pdf-mode .r-logo { height: 30px; }
 .concl-cierre { margin-top: 6px !important; color: var(--muted); font-size: 0.9em; }
 .concl-grupo { margin-bottom: 14px; break-inside: avoid; page-break-inside: avoid; }
 .concl-grupo h4 { margin: 0 0 4px; font-size: 0.95rem; color: var(--navy); }
+
+/* Espaciadores de paginación del PDF */
+.pg-spacer { display: block; margin: 0; padding: 0; border: 0; }

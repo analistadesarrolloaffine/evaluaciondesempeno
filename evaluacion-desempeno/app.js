@@ -1087,7 +1087,49 @@
     return true;
   };
 
+  /* Calcula los saltos de página antes de generar el PDF: empuja a la hoja siguiente
+     todo bloque (fila, tarjeta, título con su contenido) que quedaría partido. */
+  function paginatePdf(root) {
+    const W = root.getBoundingClientRect().width;
+    if (!W) return;
+    const pageH = W * (297 - 10 - 14) / (210 - 20);   // alto útil de la hoja A4 en píxeles del reporte
+    const y0 = () => root.getBoundingClientRect().top;
+    const shift = (el, d) => {
+      if (d < 1) return;
+      if (el.tagName === 'TR') {
+        const tr = document.createElement('tr'); tr.className = 'pg-spacer';
+        tr.innerHTML = `<td colspan="30" style="height:${d}px;padding:0;border:0;background:transparent"></td>`;
+        el.parentNode.insertBefore(tr, el);
+      } else if (/grid|flex/.test(getComputedStyle(el.parentNode).display)) {
+        el.style.marginTop = ((parseFloat(getComputedStyle(el).marginTop) || 0) + d) + 'px';
+      } else {
+        const sp = document.createElement('div'); sp.className = 'pg-spacer'; sp.style.height = d + 'px';
+        el.parentNode.insertBefore(sp, el);
+      }
+    };
+    const units = root.querySelectorAll('[data-newpage], .r-sec > h2, .avoid-break, .concl-item, .concl-grupo, .eval-table tr, .beh-row, .fb-box');
+    for (const el of units) {
+      const r = el.getBoundingClientRect();
+      if (!r.height) continue;
+      const top = r.top - y0();
+      let bottom = r.bottom - y0();
+      if (el.hasAttribute('data-newpage')) {
+        const m = top % pageH;
+        if (m > 2 && m < pageH - 2) shift(el, pageH - m);
+        continue;
+      }
+      // un título nunca queda solo al final de la hoja: viaja con el inicio de lo que sigue
+      if (el.matches('.r-sec > h2') && el.nextElementSibling) bottom += Math.min(el.nextElementSibling.getBoundingClientRect().height, 110);
+      // el encabezado de una tabla viaja con su primera fila
+      if (el.matches('thead tr')) { const t = el.closest('table'), f = t && t.tBodies[0] && t.tBodies[0].rows[0]; if (f) bottom = f.getBoundingClientRect().bottom - y0(); }
+      if (bottom - top >= pageH - 10) continue;       // más alto que una hoja: no se puede evitar el corte
+      const limit = (Math.floor(top / pageH) + 1) * pageH;
+      if (bottom > limit - 3) shift(el, limit - top);
+    }
+  }
+
   function pdfWorker(el, filename, footer, light) {
+    paginatePdf(el);
     return html2pdf().set({
       margin: [10, 10, 14, 10], filename,
       image: { type: 'jpeg', quality: light ? 0.85 : 0.95 },
@@ -1218,7 +1260,7 @@
       }
       return `<div class="concl-sec ${esc(sec.tipo || '')}"><h3>${esc(sec.titulo)}</h3>${body}</div>`;
     }).join('');
-    return `<section class="r-sec" style="break-before:page;page-break-before:always"><h2>${esc(c.titulo || 'Conclusiones y recomendaciones')}</h2>
+    return `<section class="r-sec" data-newpage><h2>${esc(c.titulo || 'Conclusiones y recomendaciones')}</h2>
       ${c.resumen ? `<p class="concl-resumen">${esc(c.resumen)}</p>` : ''}${secs}</section>`;
   }
 
