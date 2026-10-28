@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Resultados de evaluación de desempeño</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
+  <link rel="icon" type="image/png" href="assets/favicon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -19,7 +19,7 @@
   <!-- ===================== INICIO DE SESIÓN ===================== -->
   <section class="login" id="login">
     <form class="login-card" id="loginForm" autocomplete="on">
-      <span class="brand-mark" aria-hidden="true"><i data-lucide="radar"></i></span>
+      <img class="login-logo" data-brand-logo alt="Affine" src="assets/affine-logo.png">
       <h1>Evaluación de desempeño</h1>
       <p class="login-sub">Ingresa con tu usuario para ver los resultados.</p>
       <label>Usuario<input id="loginUser" name="username" autocomplete="username" required></label>
@@ -35,8 +35,8 @@
   <header class="topbar">
     <div class="topbar-inner">
       <div class="brand">
-        <span class="brand-mark" aria-hidden="true"><i data-lucide="radar"></i></span>
-        <div>
+        <img class="brand-logo" data-brand-logo alt="Affine" src="assets/affine-logo.png">
+        <div class="brand-text">
           <div class="brand-title">Evaluación de desempeño</div>
           <div class="brand-sub" id="campaignName">Carga los archivos para comenzar</div>
         </div>
@@ -254,7 +254,9 @@
     </div>
   </div>
 
+  <script src="brand.js"></script>
   <script src="users.js"></script>
+  <script src="datos/calculaser/conclusiones.js"></script>
   <script src="engine.js"></script>
   <script src="app.js"></script>
 </body>

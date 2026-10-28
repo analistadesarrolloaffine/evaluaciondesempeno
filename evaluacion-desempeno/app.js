@@ -43,6 +43,13 @@
   const SESSION_KEY = 'evaldesempeno:sesion';
   const appUsers = () => (Array.isArray(window.APP_USERS) ? window.APP_USERS : []);
   const findUser = name => appUsers().find(u => String(u.usuario || '').trim().toLowerCase() === String(name || '').trim().toLowerCase());
+  /* ---------- Marca Affine ---------- */
+  const BRAND = window.APP_BRAND || {};
+  const brandLogo = () => BRAND.logo || 'assets/affine-logo.png';
+  const brandImg = cls => `<img class="${cls}" alt="${esc(BRAND.nombre || 'Affine')}" src="${brandLogo()}">`;
+  $$('img[data-brand-logo]').forEach(i => { i.src = brandLogo(); });
+  if (BRAND.favicon) { const l = $('link[rel="icon"]'); if (l) l.href = BRAND.favicon; }
+
   function startSession(u) {
     S.user = u;
     document.body.classList.remove('locked');
@@ -952,6 +959,7 @@
     $('#report').innerHTML = `
       <header class="r-head avoid-break">
         <div>
+          ${brandImg('r-logo')}
           <div class="r-org">${esc(appTitle())}</div>
           <div class="r-name">${esc(titleCase(p.name))}</div>
           <dl class="r-meta">
@@ -1192,6 +1200,28 @@
   });
 
   /* ---------- Informe de la compañía ---------- */
+  /* Conclusiones y recomendaciones precargadas (datos/<empresa>/conclusiones.js) */
+  function conclusionsHTML() {
+    const key = S.user && S.user.conclusiones;
+    const c = key && window.APP_CONCLUSIONES && window.APP_CONCLUSIONES[key];
+    if (!c) return '';
+    const ul = l => l && l.length ? `<ul>${l.map(x => `<li>${esc(x)}</li>`).join('')}</ul>` : '';
+    const secs = (c.secciones || []).map(sec => {
+      let body = '';
+      if (sec.items) {
+        body = sec.items.map((it, i) => `<div class="concl-item">
+          <p>${sec.numerado ? esc(i + 1) + '. ' : ''}<b>${esc(it.cab || '')}</b> ${esc(it.texto || '')}</p>
+          ${ul(it.lista)}${it.cierre ? `<p class="concl-cierre">${esc(it.cierre)}</p>` : ''}</div>`).join('');
+      }
+      if (sec.grupos) {
+        body = sec.grupos.map(g => `<div class="concl-grupo"><h4>${esc(g.titulo)}</h4>${ul(g.lista)}</div>`).join('');
+      }
+      return `<div class="concl-sec ${esc(sec.tipo || '')}"><h3>${esc(sec.titulo)}</h3>${body}</div>`;
+    }).join('');
+    return `<section class="r-sec" style="break-before:page;page-break-before:always"><h2>${esc(c.titulo || 'Conclusiones y recomendaciones')}</h2>
+      ${c.resumen ? `<p class="concl-resumen">${esc(c.resumen)}</p>` : ''}${secs}</section>`;
+  }
+
   function companyHTML(people) {
     const today = new Date().toLocaleDateString('es-CO', { day: 'numeric', month: 'long', year: 'numeric' });
     const comps = filteredComps(people);
@@ -1221,6 +1251,7 @@
     <article class="report company">
       <header class="r-head avoid-break">
         <div>
+          ${brandImg('r-logo')}
           <div class="r-org">${esc(appTitle())}</div>
           <div class="r-name">Informe consolidado de la compañía</div>
           <dl class="r-meta">
@@ -1253,6 +1284,7 @@
         <table class="eval-table"><thead><tr><th>Colaborador</th><th>Área</th><th class="num">Auto</th><th class="num">Jefe</th><th class="num">Colab.</th><th class="num">Final</th><th></th><th class="num">Brecha</th></tr></thead>
         <tbody>${peopleRows}</tbody></table>
       </section>
+      ${conclusionsHTML()}
       <footer class="r-foot"><span>Escala de 1 a 4. Los promedios se calculan por competencia y luego se ponderan por fuente.</span><span>Generado el ${esc(today)}</span></footer>
     </article>`;
   }

@@ -534,3 +534,33 @@ body.locked .login { display: grid; }
 /* Rol Gestión Humana */
 body.role-gh .step-n { display: none; }
 .general-fb.in-dash { margin: 0 0 18px; }
+
+
+/* ============ Marca Affine ============ */
+.brand-logo { height: 30px; width: auto; display: block; flex: none; }
+.login-logo { height: 46px; width: auto; justify-self: start; margin-bottom: 4px; }
+/* En modo oscuro el azul del logo se pierde: se apoya sobre una pastilla blanca */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .brand-logo, :root:not([data-theme="light"]) .login-logo { background: #fff; padding: 5px 9px; border-radius: 8px; box-sizing: content-box; }
+}
+:root[data-theme="dark"] .brand-logo, :root[data-theme="dark"] .login-logo { background: #fff; padding: 5px 9px; border-radius: 8px; box-sizing: content-box; }
+.brand-text { border-left: 1px solid var(--line); padding-left: 12px; min-width: 0; }
+.r-logo { display: block; height: 34px; width: auto; margin-bottom: 14px; }
+.r-brand-note { color: var(--muted); font-size: 0.74rem; margin: -8px 0 12px; }
+body.pdf-mode .r-logo { height: 30px; }
+
+/* ============ Conclusiones y recomendaciones (informe de la compañía) ============ */
+.concl-resumen { margin: 0 0 14px; font-size: 0.95rem; }
+.concl-sec { margin-top: 18px; }
+.concl-sec > h3 { font-size: 1.05rem; margin: 0 0 10px; color: var(--navy); }
+.concl-sec.fortaleza > h3 { color: var(--emerald); }
+.concl-sec.mejora > h3 { color: var(--amber); }
+.concl-item { border: 1px solid var(--line); border-left: 4px solid var(--navy); border-radius: var(--radius); padding: 11px 14px; margin-bottom: 9px; break-inside: avoid; page-break-inside: avoid; }
+.concl-sec.fortaleza .concl-item { border-left-color: var(--emerald); }
+.concl-sec.mejora .concl-item { border-left-color: var(--amber); }
+.concl-item p { margin: 0; }
+.concl-item ul, .concl-grupo ul { margin: 6px 0 0; padding-left: 20px; }
+.concl-item li, .concl-grupo li { margin: 2px 0; }
+.concl-cierre { margin-top: 6px !important; color: var(--muted); font-size: 0.9em; }
+.concl-grupo { margin-bottom: 14px; break-inside: avoid; page-break-inside: avoid; }
+.concl-grupo h4 { margin: 0 0 4px; font-size: 0.95rem; color: var(--navy); }
