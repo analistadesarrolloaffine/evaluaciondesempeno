@@ -1089,10 +1089,11 @@
 
   /* Calcula los saltos de página antes de generar el PDF: empuja a la hoja siguiente
      todo bloque (fila, tarjeta, título con su contenido) que quedaría partido. */
-  function paginatePdf(root) {
-    const W = root.getBoundingClientRect().width;
-    if (!W) return;
-    const pageH = W * (297 - 10 - 14) / (210 - 20);   // alto útil de la hoja A4 en píxeles del reporte
+  function paginatePdf(root, scale) {
+    if (!root.getBoundingClientRect().width) return;
+    // html2pdf corta el lienzo con el ancho de su contenedor (190 mm = 718,11 px a 96 ppp), no con el del reporte
+    const CW = 190 * 96 / 25.4, ratio = (297 - 10 - 14) / (210 - 20);
+    const pageH = Math.floor(CW * scale * ratio) / scale;   // alto útil real de cada hoja, en px
     const y0 = () => root.getBoundingClientRect().top;
     const shift = (el, d) => {
       if (d < 1) return;
@@ -1115,7 +1116,7 @@
       let bottom = r.bottom - y0();
       if (el.hasAttribute('data-newpage')) {
         const m = top % pageH;
-        if (m > 2 && m < pageH - 2) shift(el, pageH - m);
+        if (m > 3 && m < pageH - 3) shift(el, pageH - m + 1);
         continue;
       }
       // un título nunca queda solo al final de la hoja: viaja con el inicio de lo que sigue
@@ -1124,12 +1125,12 @@
       if (el.matches('thead tr')) { const t = el.closest('table'), f = t && t.tBodies[0] && t.tBodies[0].rows[0]; if (f) bottom = f.getBoundingClientRect().bottom - y0(); }
       if (bottom - top >= pageH - 10) continue;       // más alto que una hoja: no se puede evitar el corte
       const limit = (Math.floor(top / pageH) + 1) * pageH;
-      if (bottom > limit - 3) shift(el, limit - top);
+      if (bottom > limit - 6) shift(el, limit - top + 1);
     }
   }
 
   function pdfWorker(el, filename, footer, light) {
-    paginatePdf(el);
+    paginatePdf(el, light ? 1.5 : 2);
     return html2pdf().set({
       margin: [10, 10, 14, 10], filename,
       image: { type: 'jpeg', quality: light ? 0.85 : 0.95 },

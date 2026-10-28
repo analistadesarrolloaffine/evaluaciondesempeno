@@ -32,7 +32,7 @@ window.APP_USERS = [
   // ▼▼▼ USUARIO DE GESTIÓN HUMANA CALCULASER ▼▼▼
   // Cuando te entreguen los Excel, cópialos en la carpeta datos/calculaser/
   // con estos nombres exactos (o cambia aquí las rutas):
-  { usuario: 'gh.calculaser',  clave: 'Calculaser2026', nombre: 'Gestión Humana', rol: 'gh',
+  { usuario: 'gh.calculaser',  clave: 'CambiaEstaClaveGH', nombre: 'Gestión Humana', rol: 'gh',
     titulo: 'Evaluación de Competencias Calculaser', campana: '',
     conclusiones: 'calculaser',   // texto fijo al final del informe de la compañía: datos/calculaser/conclusiones.js
     archivos: {
