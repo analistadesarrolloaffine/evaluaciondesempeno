@@ -1092,7 +1092,7 @@
   function paginatePdf(root, scale) {
     if (!root.getBoundingClientRect().width) return;
     // html2pdf corta el lienzo con el ancho de su contenedor (190 mm = 718,11 px a 96 ppp), no con el del reporte
-    const CW = 190 * 96 / 25.4, ratio = (297 - 10 - 14) / (210 - 20);
+    const CW = Math.ceil(190 * 96 / 25.4), ratio = (297 - 10 - 14) / (210 - 20);   // medido: el lienzo mide 719 px de ancho útil
     const pageH = Math.floor(CW * scale * ratio) / scale;   // alto útil real de cada hoja, en px
     const y0 = () => root.getBoundingClientRect().top;
     const shift = (el, d) => {
@@ -1108,7 +1108,7 @@
         el.parentNode.insertBefore(sp, el);
       }
     };
-    const units = root.querySelectorAll('[data-newpage], .r-sec > h2, .avoid-break, .concl-item, .concl-grupo, .eval-table tr, .beh-row, .fb-box');
+    const units = root.querySelectorAll('[data-newpage], .r-sec > h2, .avoid-break, .concl-item, .concl-grupo, .eval-table tr, .beh-row, .fb-box, .panel-foot, .kpi-s, .part-row, .r-foot, .gap-row');
     for (const el of units) {
       const r = el.getBoundingClientRect();
       if (!r.height) continue;
@@ -1136,7 +1136,7 @@
       image: { type: 'jpeg', quality: light ? 0.85 : 0.95 },
       html2canvas: { scale: light ? 1.5 : 2, useCORS: true, backgroundColor: '#FFFFFF', scrollX: 0, scrollY: 0, x: 0, y: 0, windowWidth: 718 },
       jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-      pagebreak: { mode: ['css', 'legacy'], avoid: ['.avoid-break', '.beh-row', '.eval-table tr'] },
+      pagebreak: { mode: [] },   // los saltos los calcula paginatePdf; así la librería no agrega los suyos
     }).from(el).toPdf().get('pdf').then(pdf => {
       const total = pdf.internal.getNumberOfPages();
       for (let i = 1; i <= total; i++) {
